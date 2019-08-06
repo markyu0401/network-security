@@ -95,7 +95,7 @@ jovyan@sslstriphacker:~$ cat sslstrip.log
 
 It should be empty, since HTTPS-based connection is still used.
 
-Now, open another firefox browser tab in the victim browser window. This time, let's specify to use HTTP-based connection to visit the server.
+Now, open another firefox browser tab in the victim browser window. This time, let's visit the server via the server's IP address.
 
 ![HTTP Login Page]({{ page.root }}/fig/sslstrip/victim-http-login.png)
 
@@ -109,5 +109,9 @@ username=admin&password=admin
 ~~~
 {: .output}
 
+> ## HTTP-based connection
+> 
+> Visiting the server via the server's IP address is actually building a HTTP-based connection with the server.
+{: .callout} 
 
 {% include links.md %}

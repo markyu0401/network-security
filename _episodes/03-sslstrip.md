@@ -71,7 +71,13 @@ Type the server's IP address in the address bar. This should bring up a simple l
 
 ![HTTPS Login Page]({{ page.root }}/fig/sslstrip/victim-https-login.png)
 
-Log in with the username and password (use *admin* for both username and password). If a warning indicates this connection is not secure, please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
+Log in with the username and password (use *admin* for both username and password).
+
+> ## HTTPS-based connection
+> 
+> The connection between the client and the server is HTTPS-based by default. HTTPS  If a warning indicates this connection is not secure, 
+> please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
+{: .callout} 
 
 Now, let us conduct a SSL Strip attack which will cause the server website and all communication between the server and victim to employ insecure HTTP.
 

@@ -25,12 +25,12 @@ To strip it, a hacker intervenes in the redirection of the HTTP to the secure HT
 
 The demonstration on CHEESEHub illustrates the SSL Strip attack using three separate machines; a victim, server, and, hacker. The *sslstrip* python library provided by Moxie (the corresponding the source code from [Moxie's sslstrip github](https://github.com/moxie0/sslstrip)) is used in the hacker to perform a SSL Strip attack on the victim. The hacker conducts a SSL Strip attack by first poisoning the ARP table. The victims are beguiled into believing that the hacker is the server, causing all messages from the victim to the server to be routed through the hacker. The hacker then redirects all HTTPS traffic to HTTP traffic to compromise the SSL-enabled communication to access the authentication information (e.g. username and password). We verify the success of the attack in two ways.
 
-1. We will visit the server via HTTP mode in web browser instead of HTTPS modes to check if we could access the website.
+1. We will note whether the server website is being served over HTTP or HTTPS and also verify whether the links embedded in the server website use HTTP or HTTPS.
 2. We will look at *sslstrip.log* on the hacker terminal to check if we successfully obtain the username and password.
 
 > ## prerequisites
 > 
-> You will need to conduct the ARP spoofing attack prior to the SSL Strip attack. If you're not familiar with it, you could resort to [Lesson: ARP Poisoning Attack]({{ page.root }}/02-arpspoof/index.html)
+> You will need to conduct the ARP spoofing attack prior to the SSL Strip attack. If you're not familiar with it, you could refer to [Lesson: ARP Poisoning Attack]({{ page.root }}/02-arpspoof/index.html)
 {: .prereq} 
 
 > ## Getting Started
@@ -42,7 +42,7 @@ The demonstration on CHEESEHub illustrates the SSL Strip attack using three sepa
 
 We will start by first adding the SSLStrip application:
 
-![Add ArpSpoof]({{ page.root }}/fig/sslstrip/add-sslstrip.png)
+![Add SSLStrip]({{ page.root }}/fig/sslstrip/add-sslstrip.png)
 
 Next, click the *View* link to go to the application-specific page and start the application containers:
 
@@ -63,7 +63,19 @@ We will start with the hacker. On the hacker browser tab, click on **Hacker.ipyn
 
 ![Open Hacker Notebook]({{ page.root }}/fig/sslstrip/hacker-notebook.png)
 
-Then, click on **SSLStrip.ipynb** to open a Jupyter notebook with instructions on conducting the SSL Strip attack.
+We then access the simple website served by the server from the victim's computer:
+
+![Open Victim Browser]({{ page.root }}/fig/sslstrip/victim-firefox.png)
+
+Type the server's IP address in the address bar. This should bring up a simple login page:
+
+![HTTPS Login Page]({{ page.root }}/fig/sslstrip/victim-https-login.png)
+
+Log in with the username and password (use *admin* for both username and password). If a warning indicates this connection is not secure, please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
+
+Now, let us conduct a SSL Strip attack which will cause the server website and all communication between the server and victim to employ insecure HTTP.
+
+In the hacker window, click on **SSLStrip.ipynb** to open a Jupyter notebook with instructions on conducting the SSL Strip attack.
 
 Keep the ARP spoofing attack running, the next step is to open a new terminal on the hacker and redirect all HTTPS traffic to a port (e.g. 8080) that SSLStrip will monitor by using the *iptables* command:
 ~~~
@@ -77,29 +89,11 @@ jovyan@sslstriphacker:~$ sslstrip -l 8080 &> /dev/null &
 ~~~
 {: .language-bash}
 
-Keep the attack running ans switch to the victim side Open a firefox browser in the victim browser window:
-
-![Open Victim Terminal]({{ page.root }}/fig/sslstrip/victim-firefox.png)
-
-Type the server's IP address in the address bar. This should bring up a simple login page:
-
-![HTTPS Login Page]({{ page.root }}/fig/sslstrip/victim-https-login.png)
-
-Log in with the username and password (use *admin* for both username and password). If a warning indicates this connection is not secure, please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
-
-After logging in, we could quickly check to see if SSLStrip was able to extract any user information. Switch back to the hacker termial, print the content of the SSLStrip logs using the *cat* command.
-~~~
-jovyan@sslstriphacker:~$ cat sslstrip.log
-~~~
-{: .language-bash}
-
-It should be empty, since HTTPS-based connection is still used.
-
-Now, open another firefox browser tab in the victim browser window. This time, let's visit the server via the server's IP address.
+Now, open another firefox browser tab in the victim browser window. Type in the server's IP address in the address bar and log in with a username and password.
 
 ![HTTP Login Page]({{ page.root }}/fig/sslstrip/victim-http-login.png)
 
-After logging in, we should be able to see the username and password in the SSLStrip logs.
+After logging in, we should be able to see the username and password used to log in in the SSLStrip logs.
 ~~~
 jovyan@sslstriphacker:~$ cat sslstrip.log
 ~~~
@@ -111,7 +105,9 @@ username=admin&password=admin
 
 > ## HTTP-based connection
 > 
-> Visiting the server via the server's IP address is actually building a HTTP-based connection with the server.
+> Note that the browser will indicate that insecure HTTP is being used, but users may not notice this warning. Also, by hovering over the link in 
+the returned webpage, we can see that it uses HTTP instead of HTTPS.
 {: .callout} 
 
 {% include links.md %}
+

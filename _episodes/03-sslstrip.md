@@ -59,11 +59,7 @@ next to the container's name:
 
 ![Launch Containers]({{ page.root }}/fig/sslstrip/launch-containers.png)
 
-We will start with the hacker. On the hacker browser tab, click on **Hacker.ipynb** to open a Jupyter notebook to conduct an ARP spoofing attack:
-
-![Open Hacker Notebook]({{ page.root }}/fig/sslstrip/hacker-notebook.png)
-
-We then access the simple website served by the server from the victim's computer:
+We will start with the victim. Let's access the simple website served by the server from the victim's browser:
 
 ![Open Victim Browser]({{ page.root }}/fig/sslstrip/victim-firefox.png)
 
@@ -71,13 +67,27 @@ Type the server's IP address in the address bar. This should bring up a simple l
 
 ![HTTPS Login Page]({{ page.root }}/fig/sslstrip/victim-https-login.png)
 
-Log in with the username and password (use *admin* for both username and password).
+Log in with the username and password (use *admin* for both username and password). In the welcome page, there is a hyperlink to return to the login page.
+Once we hover over the hyperlink, the IP address of the server will pop up at the left bottom corner of the browser. The IP address indicates the connection 
+between the server and the victim is HTTPS based.
+
+![Login Hover HTTPS]({{ page.root }}/fig/sslstrip/login-hover-https.png)
 
 > ## HTTPS-based connection
 > 
-> The connection between the client and the server is HTTPS-based by default. HTTPS  If a warning indicates this connection is not secure, 
+> The connection between the victim and the server is HTTPS-based by default. If a warning indicates this connection is not secure, 
 > please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
 {: .callout} 
+
+After a successful login, let's switch to the hacker. On the hacker browser tab, click on **Hacker.ipynb** to open a Jupyter notebook to conduct an ARP spoofing attack:
+
+![Open Hacker Notebook]({{ page.root }}/fig/sslstrip/hacker-notebook.png)
+
+> ## Check whether the ARP attack is successful
+>
+> Visit the website in victim again to cause the arp poisoning.
+> Then type `arp -n` in the terminal of victim and check the `HWadress` filed to confirm if the attack is successful.
+{: .callout}
 
 Now, let us conduct a SSL Strip attack which will cause the server website and all communication between the server and victim to employ insecure HTTP.
 
@@ -95,11 +105,20 @@ jovyan@sslstriphacker:~$ sslstrip -l 8080 &> /dev/null &
 ~~~
 {: .language-bash}
 
-Now, open another firefox browser tab in the victim browser window. Type in the server's IP address in the address bar and log in with a username and password.
+Now, open another firefox browser tab in the victim browser window. Type in the server's IP address in the address bar and log in with username and password.
 
 ![HTTP Login Page]({{ page.root }}/fig/sslstrip/victim-http-login.png)
 
-After logging in, we should be able to see the username and password used to log in in the SSLStrip logs.
+After logging in and hovering over the hyperlink in welcome page, we should be able to see that the link is not HTTPS.
+
+![Login Hover HTTPS]({{ page.root }}/fig/sslstrip/login-hover-http.png)
+
+> ## HTTP-based connection
+> 
+> Note that the browser will also indicate that insecure HTTP is being used instead of HTTPS.
+{: .callout} 
+
+Besides, we should be able to see the username and password used to log in in the SSLStrip logs.
 ~~~
 jovyan@sslstriphacker:~$ cat sslstrip.log
 ~~~
@@ -109,11 +128,11 @@ username=admin&password=admin
 ~~~
 {: .output}
 
-> ## HTTP-based connection
+> ## SSL strip
 > 
-> Note that the browser will indicate that insecure HTTP is being used, but users may not notice this warning. Also, by hovering over the link in 
-the returned webpage, we can see that it uses HTTP instead of HTTPS.
-{: .callout} 
+> In this lesson, the hacker is able to strip the SSL via arpspoofing the victims. Once the arp poisoning is initiated after victims visiting the server, the hacker is 
+> able to intercept the traffic from the victims to the server, acting as the server and collecting confidential information from the victims. 
+{: .callout}
 
 {% include links.md %}
 

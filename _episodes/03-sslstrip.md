@@ -16,9 +16,9 @@ keypoints:
 
 The SSL Strip attack is a typical *man-in-the-middle* attack used to circumvent the security enforced by SSL certificates on HTTPS-enabled websites. It's a technique that downgrades your connection from secure HTTPS to insecure HTTP and exposes you to eavesdropping and data manipulation.
 
-The SSL (Secure Sockets Layer) protocol is a transport layer protocol targets to provide communication security and data integrity for internet. Specifically for the website browsing, it's utilized by HTTPS to protect the confidentiality and integrity of website communication with browsers. HTTPS wraps HTTP data into secured SSL packets before sending and receiving via SSL certificates. Based on the public and private key pair privided by the SSL certificates, HTTPS makes the *man-in-the-middle* attack uneasy. However, SSL Strip attack could make the efforts of HTTPS in vain by stripping the SSL. 
+The SSL (Secure Sockets Layer) protocol is a transport layer protocol targets to provide communication security and data integrity for internet. Specifically for the website browsing, it's utilized by HTTPS to protect the confidentiality and integrity of website communication with browsers. HTTPS wraps HTTP data into secured SSL packets before sending and receiving via SSL certificates. The use of SSL certificates in HTTPS makes *man-in-the-middle* attacks challenging. However, SSL Strip attacks the effectiveness of HTTPS by stripping the SSL layer.
 
-To strip it, a hacker intervenes in the redirection of the HTTP to the secure HTTPS protocol. And the hacker could intercept requests sent from the victims to the server by arpspoofing the victims into believing that the hacker is the server. The hacker will then continue to establish an HTTPS connection between himself and the server, and an unsecured HTTP connection with the user, acting as a “bridge” between them.
+A hacker conducting this attack intervenes in the redirection of the HTTP to the secure HTTPS protocol. A hacker can start by using ARP poisoning to first intercept communication between the victim and a server. The hacker will then continue to establish an HTTPS connection between themselves and the server, and an unsecured HTTP connection with the user, acting as a “bridge” between them.
 
 
 ### Demonstration
@@ -55,22 +55,17 @@ Next, click the *View* link to go to the application-specific page and start the
 {: .callout}
 
 Once all the containers have started, launch each container's web interface in a separate browser tab by clicking the icon 
-next to the container's name:
-
-![Launch Containers]({{ page.root }}/fig/sslstrip/launch-containers.png)
+next to the container's name.
 
 We will start with the victim. Let's access the simple website served by the server from the victim's browser:
 
 ![Open Victim Browser]({{ page.root }}/fig/sslstrip/victim-firefox.png)
 
-Type the server's IP address in the address bar. This should bring up a simple login page:
+Type the server's IP address in the address bar. This should bring up a simple login page. Log in with any username and password. Note that the address bar indicates that HTTPS is being used. 
+In the welcome page, there is also a hyperlink to return to the login page. Once we hover over the hyperlink, the IP address of the server will pop up at the left bottom corner of the browser. 
+The URL indicates that the target link is using HTTPS. 
 
-![HTTPS Login Page]({{ page.root }}/fig/sslstrip/victim-https-login.png)
-
-Log in with the username and password (use *admin* for both username and password). In the welcome page, there is a hyperlink to return to the login page.
-Once we hover over the hyperlink, the IP address of the server will pop up at the left bottom corner of the browser. The IP address indicates the connection 
-between the server and the victim is HTTPS based.
-
+![Confirm HTTPS]({{ page.root }}/fig/sslstrip/victim-https-conf.png)
 ![Login Hover HTTPS]({{ page.root }}/fig/sslstrip/login-hover-https.png)
 
 > ## HTTPS-based connection
@@ -79,14 +74,12 @@ between the server and the victim is HTTPS based.
 > please ignore it and confirm the security exception. This is because of the self-signed certificates we used.
 {: .callout} 
 
-After a successful login, let's switch to the hacker. On the hacker browser tab, click on **Hacker.ipynb** to open a Jupyter notebook to conduct an ARP spoofing attack:
-
-![Open Hacker Notebook]({{ page.root }}/fig/sslstrip/hacker-notebook.png)
+After a successful login, let's switch to the hacker. On the hacker browser tab, click on **Hacker.ipynb** to open a Jupyter notebook to conduct an ARP spoofing attack.
 
 > ## Check whether the ARP attack is successful
 >
-> Visit the website in victim again to cause the arp poisoning.
-> Then type `arp -n` in the terminal of victim and check the `HWadress` filed to confirm if the attack is successful.
+> Visit the website in victim again to cause the ARP poisoning.
+> Then type `arp -n` in the terminal of victim and check the `HWadress` field to confirm if the attack is successful.
 {: .callout}
 
 Now, let us conduct a SSL Strip attack which will cause the server website and all communication between the server and victim to employ insecure HTTP.
@@ -107,31 +100,31 @@ jovyan@sslstriphacker:~$ sslstrip -l 8080 &> /dev/null &
 
 Now, open another firefox browser tab in the victim browser window. Type in the server's IP address in the address bar and log in with username and password.
 
-![HTTP Login Page]({{ page.root }}/fig/sslstrip/victim-http-login.png)
+Notice that this time, the address bar indicates insecure HTTP. Hovering over the hyperlink in the welcome page, indicates that the URL is no longer employing HTTPS.
 
-After logging in and hovering over the hyperlink in welcome page, we should be able to see that the link is not HTTPS.
+![Confirm HTTP]({{ page.root }}/fig/sslstrip/victim-http-conf.png)
 
 ![Login Hover HTTPS]({{ page.root }}/fig/sslstrip/login-hover-http.png)
 
 > ## HTTP-based connection
 > 
-> Note that the browser will also indicate that insecure HTTP is being used instead of HTTPS.
+> Note that despite the browser indicating that insecure HTTP is being used instead of HTTPS, most users may not notice this warning.
 {: .callout} 
 
-Besides, we should be able to see the username and password used to log in in the SSLStrip logs.
+Besides, we should be able to see the username and password used in the SSLStrip logs.
 ~~~
 jovyan@sslstriphacker:~$ cat sslstrip.log
 ~~~
 {: .language-bash}
 ~~~
-username=admin&password=admin
+username=admin&password=test
 ~~~
 {: .output}
 
 > ## SSL strip
 > 
-> In this lesson, the hacker is able to strip the SSL via arpspoofing the victims. Once the arp poisoning is initiated after victims visiting the server, the hacker is 
-> able to intercept the traffic from the victims to the server, acting as the server and collecting confidential information from the victims. 
+> In this lesson, the hacker is able to strip the SSL via ARP poisoning the victim. Once the ARP Poisoning is initiated, the hacker is
+> able to intercept the traffic from the victim to the server, acting as the server and possibly collecting confidential information from the victim. 
 {: .callout}
 
 {% include links.md %}

